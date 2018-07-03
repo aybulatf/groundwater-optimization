@@ -1,0 +1,13 @@
+flopy==3.2.6
+numpy==1.12.1
+pika==0.10.0
+mystic==0.3.1
+scikit-learn==0.18.1
+deap==1.2.2
+warnings
+json
+scipy
+uuid
+random
+sklearn
+time

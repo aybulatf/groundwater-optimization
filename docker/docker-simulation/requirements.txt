@@ -1,7 +1,0 @@
-flopy==3.2.6
-numpy==1.12.1
-pika==0.10.0
-time
-json
-shutil
-

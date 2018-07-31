@@ -9,21 +9,22 @@ from InowasFlopyAdapter.InowasFlopyCalculationAdapter import InowasFlopyCalculat
 
 class Simulation(object):
 
-    def __init__(self, data_folder, optimization_id, simulation_id):
+    def __init__(self, simulation_id):
         # Set model workspace
         self.model_ws = os.path.join(
-            os.path.realpath(data_folder),
-            str(optimization_id),
-            str(simulation_id)
+            os.path.realpath(os.environ['DOCKER_TEMP_FOLDER']),
+            os.environ['OPTIMIZATION_ID'],
+            simulation_id
         )
         print('Set model workspace to {}'.format(self.model_ws))
         
         # Set configuration file name
         config_file = os.path.join(
-            os.path.realpath(data_folder),
-            str(optimization_id),
-            'config.json'
+            os.path.realpath(os.environ['DOCKER_TEMP_FOLDER']),
+            os.environ['OPTIMIZATION_ID'],
+            os.environ['MODEL_FILE_NAME']
         )
+
         print('Reading configulation file {}'.format(config_file))
 
         with open(config_file) as f:

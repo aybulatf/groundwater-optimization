@@ -9,7 +9,7 @@ const NavBar = () => {
       <AppBar position="static">
         <Toolbar>
           <Typography variant="title" color="inherit">
-            Title
+            Groundwater optimization
           </Typography>
         </Toolbar>
       </AppBar>

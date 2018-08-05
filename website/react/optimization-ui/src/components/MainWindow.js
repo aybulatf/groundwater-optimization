@@ -8,7 +8,7 @@ import Button from '@material-ui/core/Button';
 import Typography from '@material-ui/core/Typography'
 
 
-import CreateOptimizationObjects from './CreateOptimizationObjects';
+import AddOptimizationObjects from './AddOptimizationObjects';
 import CreateObjectives from './CreateObjectives';
 import CreateConstraints from './CreateConstraints';
 import RunOptimization from './RunOptimization';
@@ -46,7 +46,7 @@ function getStepContent(step) {
     case 0:
       return <ModelUpload />;
     case 1:
-      return <CreateOptimizationObjects />;
+      return <AddOptimizationObjects />;
     case 2:
       return <CreateObjectives />;
     case 3:

@@ -236,7 +236,9 @@ class ModelGrid extends React.Component {
     });
   }
 
-  handleInput = name => event => {
+  handleInput = (name, name1) => event => {
+    console.log(name)
+    console.log(name1)
     this.setState({
       [name]: event.target.value,
     });
@@ -268,7 +270,7 @@ class ModelGrid extends React.Component {
             helperText = "Chose parameter"
             value={this.state.gridColorParameter}
             className={classes.textField}
-            onChange={this.handleInput('gridColorParameter')}
+            onChange={this.handleInput('gridColorParameter', 'lalalalal')}
             SelectProps={{
               MenuProps: {
                 className: classes.menu,

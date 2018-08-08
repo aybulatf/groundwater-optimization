@@ -42,10 +42,10 @@ class ModelUpload extends React.Component {
       "nam", "dis", "bas", "bas6", "lpf", "pcg", "oc", "wel", "chd", "lmt", "lmt6", "nwt", "rch", "ghb",
       "adv", "btn", "dsp", "gcg", "ssm"
     ]
+    this.modelData = props.modelData;
 
     this.state = {
       message: null,
-      modelData: null,
       modelUploaded: false,
       modelUploadedSuccess: false
     };
@@ -87,11 +87,11 @@ class ModelUpload extends React.Component {
         if (body.message.code == 200) {
           modelUploadedSuccess = true;
         }
-   
+        this.modelData = body.model_data;
+        this.props.setModelData(this.modelData);
         this.setState(
           {
             message: body.message,
-            modelData: body.model_data,
             modelUploaded: true,
             modelUploadedSuccess: modelUploadedSuccess,
             waitingForResponse: false
@@ -119,17 +119,17 @@ class ModelUpload extends React.Component {
                 <Grid container spacing={24}>
                   <Grid item xs>
                     <ModelOverviewTable 
-                      mfPackages = {modelData.data.mf.packages}
-                      mtPackages = {modelData.data.mt.packages}
-                      nlay = {modelData.data.mf.DIS.nlay}
-                      nrow = {modelData.data.mf.DIS.nrow}
-                      ncol = {modelData.data.mf.DIS.ncol}
-                      nper = {modelData.data.mf.DIS.nper}
+                      mfPackages = {this.modelData.data.mf.packages}
+                      mtPackages = {this.modelData.data.mt.packages}
+                      nlay = {this.modelData.data.mf.DIS.nlay}
+                      nrow = {this.modelData.data.mf.DIS.nrow}
+                      ncol = {this.modelData.data.mf.DIS.ncol}
+                      nper = {this.modelData.data.mf.DIS.nper}
                     />
                   </Grid>
                   <Grid item xs>
                     <ModelGrid
-                      modelData = {modelData}
+                      modelData = {this.modelData}
                       width = {500}
                       height = {500}
                     />

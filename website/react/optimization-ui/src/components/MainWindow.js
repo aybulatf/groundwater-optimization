@@ -41,12 +41,12 @@ function getSteps() {
   ];
 }
 
-function getStepContent(step) {
+function getStepContent(step, modelData, setModelData) {
   switch (step) {
     case 0:
-      return <ModelUpload />;
+      return <ModelUpload modelData={modelData} setModelData={setModelData}/>;
     case 1:
-      return <AddOptimizationObjects />;
+      return <AddOptimizationObjects modelData={modelData}  setModelData={setModelData}/>;
     case 2:
       return <CreateObjectives />;
     case 3:
@@ -61,12 +61,16 @@ function getStepContent(step) {
 class MainWindow extends React.Component {
   constructor(props) {
     super(props);
+    this.modeData = null;
     this.state = {
       activeStep: 0,
       skipped: new Set()
     };
 
   }
+  setModelData(modelData){
+    this.modeData = modelData;
+  };
   isStepOptional = step => {
     return step === 3;
   };
@@ -142,7 +146,7 @@ class MainWindow extends React.Component {
           })}
         </Stepper>
    
-        {getStepContent(activeStep)}
+        {getStepContent(activeStep, this.modeData, this.setModelData.bind(this))}
                   
         <Button
           disabled={activeStep === 0}

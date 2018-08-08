@@ -8,6 +8,10 @@ import Grid from '@material-ui/core/Grid';
 
 import ModelGrid from './ModelGrid';
 import OptimizationObjectsTable from './OptimizationObjectsTable';
+import OptimizationObject from './prototypes/OptimizationObject'
+import FormPosition from './forms/FormPosition'
+import FormFlux from './forms/FormFlux'
+import FormConcentration from './forms/FormConcentration'
 
 const styles = {
   root: {
@@ -26,68 +30,103 @@ const styles = {
 }
 
 class AddOptimizationObjects extends React.Component {
-  _optimizationObjectPrototype = {
-    id: null,
-    position: {
-      lay: {
-        min: null,
-        max: null
-      },
-      row: {
-        min: null,
-        max: null
-      },
-      col: {
-        min: null,
-        max: null
-      }
-    },
-  }
   constructor(props) {
     super(props);
-    
-    this.state = {
-      optimizationObjects: []
-    };
+    this.modelData = props.modelData,
+
+      this.state = {
+        optimizationObjects: []
+      };
+    this.editedObject = null;
+    this.editedParameter = null;
   }
 
   handleAddObject() {
-    this.setState({
-      optimizationObjects : this.state.optimizationObjects.concat([this._optimizationObjectPrototype])
+    this.setState((prevState, props) => {
+      let newObject = new OptimizationObject(
+        prevState.optimizationObjects.length,
+        this.modelData.data.mf.DIS.nlay,
+        this.modelData.data.mf.DIS.nrow,
+        this.modelData.data.mf.DIS.ncol,
+        this.modelData.data.mf.DIS.nper
+      );
+      console.log(newObject)
+      return {optimizationObjects: prevState.optimizationObjects.concat([newObject])};
     });
   };
-  
+
+  handleEditObject(index, parameter) {
+    console.log(index)
+    console.log(parameter)
+    this.setState({
+      editedObjectIndex: index,
+      editedParameter: parameter
+    });
+  };
+
   render() {
 
     const { classes } = this.props;
-    const { optimizationObjects } = this.state;
+    const { optimizationObjects, editedObjectIndex, editedParameter } = this.state;
+    console.log(editedParameter)
+    console.log(editedObjectIndex)
     return (
       <Paper className={classes.root}>
-
-          <Grid container spacing={24}>
-            <Grid item xs>
-              <OptimizationObjectsTable 
-                optimizationObjects = {optimizationObjects}
-              />
-              <Button color="primary" className={classes.button} onClick = {this.handleAddObject.bind(this)}>
-                Add wel
+        <Grid>
+          <Grid item xs={6}>
+            <OptimizationObjectsTable
+              optimizationObjects={optimizationObjects}
+              handleEditObject={this.handleEditObject.bind(this)}
+            />
+            <Button color="primary" className={classes.button} onClick={this.handleAddObject.bind(this)}>
+              Add wel
               </Button>
-            </Grid>
-            
-            <Grid item xs>
-              {/* <ModelGrid
-                modelData = {modelData}
-                width = {500}
-                height = {500}
-              /> */}
-            </Grid>
           </Grid>
-            
+
+          <Grid item xs={6}>
+            {editedParameter === "position" && (
+               <FormPosition
+               optimizationObject={optimizationObjects[editedObjectIndex]}
+               handleEditObject={this.handleEditObject.bind(this)}
+             />
+            )}
+            {/* {function () {
+              
+              switch (editedParameter) {
+                
+                case "position":
+                return(
+                  <FormPosition
+                    optimizationObject={optimizationObjects[editedObjectIndex]}
+                    handleEditObject={this.handleEditObject.bind(this)}
+                  />)
+                  break;
+                case "flux":
+                  <FormFlux
+                    optimizationObject={optimizationObjects[editedObjectIndex]}
+                    handleEditObject={this.handleEditObject.bind(this)}
+                  />
+                  break;
+                case "concentration":
+                  <FormConcentration
+                    optimizationObject={optimizationObjects[editedObjectIndex]}
+                    handleEditObject={this.handleEditObject.bind(this)}
+                  />
+                  break;
+
+                default:
+                  break;
+              }
+            }
+            } */}
+          </Grid>
+        </Grid>
+
       </Paper>
     )
   }
 };
-  
+
 
 export default withStyles(styles)(AddOptimizationObjects);
 

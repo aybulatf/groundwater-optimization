@@ -2,19 +2,25 @@ import React from 'react'
 import AppBar from '@material-ui/core/AppBar'
 import Toolbar from '@material-ui/core/Toolbar'
 import Typography from '@material-ui/core/Typography'
+import { withStyles } from '@material-ui/core/styles';
 
-const NavBar = () => {
+const styles = {
+  navbar: {
+    // backgroundColor: "#4C4C4C"
+  }
+};
+
+const NavBar = (props) => {
+  const { classes } = props;
   return (
-    <div>
-      <AppBar position="static">
+      <AppBar className={classes.navbar} position="static">
         <Toolbar>
           <Typography variant="title" color="inherit">
             Groundwater optimization
           </Typography>
         </Toolbar>
       </AppBar>
-    </div>
   )
 }
 
-export default NavBar;
+export default withStyles(styles)(NavBar);

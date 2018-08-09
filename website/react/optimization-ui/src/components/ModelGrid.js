@@ -1,15 +1,19 @@
 import React from 'react'
 import { withStyles } from '@material-ui/core/styles';
-import Button from '@material-ui/core/Button';
+import Paper from '@material-ui/core/Paper';
 import * as d3 from 'd3'
-import Grid from '@material-ui/core/Grid';
+import Typography from '@material-ui/core/Typography'
 import { TextField } from '../../node_modules/@material-ui/core';
 import MenuItem from '@material-ui/core/MenuItem';
 
 
 const styles = {
-  plot: {
-    border: "2px solid blue"
+  modelGrid: {
+    // width: '100%',
+    width: 580,
+    marginTop: 10,
+    marginBottom: 10,
+    overflowX: 'auto',
   },
   textField: {
     marginLeft: 20,
@@ -23,14 +27,14 @@ const styles = {
 
 
 const getGridColor = (parameter, value) => {
-  switch(parameter) {
+  switch (parameter) {
     case "ibound":
-      switch(value) {
+      switch (value) {
         case 0: return "white";
         case 1: return "blue";
       };
     default:
-      switch(value) {
+      switch (value) {
         case 0: return "white";
         case 1: return "blue";
       };
@@ -43,7 +47,7 @@ const getGrid = (delr, delc) => {
   var ypos = 0;
   var modelWidth = 0;
   var modelHeight = 0;
-  
+
   for (let width of delc) {
     modelWidth += width;
   }
@@ -66,7 +70,7 @@ const getGrid = (delr, delc) => {
     xpos = 0;
     ypos += height;
   }
-  return {data: data, modelWidth: modelWidth, modelHeight: modelHeight};
+  return { data: data, modelWidth: modelWidth, modelHeight: modelHeight };
 }
 
 
@@ -78,7 +82,7 @@ class ModelGrid extends React.Component {
   constructor(props) {
     super(props);
     this.gridData = getGrid(props.modelData.data.mf.DIS.delr, props.modelData.data.mf.DIS.delc);
-    this.scaleFactor = Math.min(props.width/this.gridData.modelWidth, props.height/this.gridData.modelHeight);
+    this.scaleFactor = Math.min(props.width / this.gridData.modelWidth, props.height / this.gridData.modelHeight);
     this.spdPackages = [];
     this.nrow = props.modelData.data.mf.DIS.nrow;
     this.ncol = props.modelData.data.mf.DIS.ncol;
@@ -107,11 +111,11 @@ class ModelGrid extends React.Component {
   }
 
   getGridValues(parameter, layer) {
-    switch(parameter) {
+    switch (parameter) {
       case "ibound":
         const ibound = this.props.modelData.data.mf[this._basPackageName].ibound;
-        return ibound[layer]; 
-    
+        return ibound[layer];
+
       case "CHD":
         const chdSPD = this.props.modelData.data.mf.CHD.stress_period_data;
         var chdGrid = Array(this.nrow).fill(Array(this.ncol).fill(0));
@@ -124,7 +128,7 @@ class ModelGrid extends React.Component {
           }
         }
         return chdGrid;
-      
+
       case "WEL":
         const welSPD = this.props.modelData.data.mf.WEL.stress_period_data;
         var welGrid = Array(this.nrow).fill(Array(this.ncol).fill(0))
@@ -150,7 +154,7 @@ class ModelGrid extends React.Component {
           }
         }
         return ssmGrid;
-      
+
       case "GHB":
         const ghbSPD = this.props.modelData.data.mf.GHB.stress_period_data;
         var ghbGrid = Array(this.nrow).fill(Array(this.ncol).fill(0))
@@ -176,16 +180,16 @@ class ModelGrid extends React.Component {
           }
         }
         return rchGrid;
-      
+
       default:
-        console.log('Unknown package '+parameter.toString())
+        console.log('Unknown package ' + parameter.toString())
     }
   }
   componentDidMount() {
-    
+
     this.canvas = d3.select(this.refs.canvas).call(d3.zoom().scaleExtent([-3, 15]).on("zoom", this.zoomed.bind(this)));
     this.ctx = this.canvas.node().getContext("2d");
-    
+
     this.ctx.beginPath();
     for (const d of this.gridData.data) {
       this.ctx.rect(
@@ -194,22 +198,22 @@ class ModelGrid extends React.Component {
     this.ctx.lineWidth = 1;
     this.ctx.stroke();
   }
-    
+
 
   componentDidUpdate() {
     var gridValues = null;
     this.ctx.save();
     this.ctx.clearRect(0, 0, this.props.width, this.props.height);
-      
-    if (this.state.zoomTransform){
+
+    if (this.state.zoomTransform) {
       this.ctx.translate(this.state.zoomTransform.x, this.state.zoomTransform.y);
       this.ctx.scale(this.state.zoomTransform.k, this.state.zoomTransform.k);
     }
-    if (this.state.gridColorParameter !== null && this.state.gridColorLayer !== null){
+    if (this.state.gridColorParameter !== null && this.state.gridColorLayer !== null) {
       gridValues = this.getGridValues(this.state.gridColorParameter, this.state.gridColorLayer)
     }
     console.log(gridValues)
-    
+
     if (gridValues) {
       for (let d of this.gridData.data) {
         this.ctx.fillStyle = getGridColor(this.state.gridColorParameter, gridValues[d[4]][d[5]]);
@@ -217,7 +221,7 @@ class ModelGrid extends React.Component {
           this.scaleGridData(d[0]), this.scaleGridData(d[1]), this.scaleGridData(d[2]), this.scaleGridData(d[3])
         );
       }
-      
+
     }
     this.ctx.beginPath();
     for (let d of this.gridData.data) {
@@ -236,9 +240,7 @@ class ModelGrid extends React.Component {
     });
   }
 
-  handleInput = (name, name1) => event => {
-    console.log(name)
-    console.log(name1)
+  handleInput = name => event => {
     this.setState({
       [name]: event.target.value,
     });
@@ -248,9 +250,9 @@ class ModelGrid extends React.Component {
     const { classes } = this.props;
     const { width, height } = this.props;
 
-    var gridColorParameters = [{value: 'ibound', label: 'ibound'}]
-    for (let _package of this.spdPackages){
-      gridColorParameters.push({value: _package, label: _package})
+    var gridColorParameters = [{ value: 'ibound', label: 'ibound' }]
+    for (let _package of this.spdPackages) {
+      gridColorParameters.push({ value: _package, label: _package })
     }
 
     var gridColorLayers = [];
@@ -262,22 +264,29 @@ class ModelGrid extends React.Component {
     }
 
     return (
-      <Grid container>
-        <Grid item xs={12}>
-          <TextField
-            id="selectParameter"
-            select
-            helperText = "Chose parameter"
-            value={this.state.gridColorParameter}
-            className={classes.textField}
-            onChange={this.handleInput('gridColorParameter', 'lalalalal')}
-            SelectProps={{
-              MenuProps: {
-                className: classes.menu,
-              },
-            }}
-            margin="normal"
-          >
+      <div>
+        <Typography variant="headline" gutterBottom>
+          Model grid
+        </Typography>
+
+        <Paper className={classes.modelGrid}>
+            <canvas ref="canvas" className={classes.plot} width={width} height={height} />
+        </Paper>
+
+        <TextField
+          id="selectParameter"
+          select
+          helperText="Chose parameter"
+          value={this.state.gridColorParameter}
+          className={classes.textField}
+          onChange={this.handleInput('gridColorParameter')}
+          SelectProps={{
+            MenuProps: {
+              className: classes.menu,
+            },
+          }}
+          margin="normal"
+        >
           {gridColorParameters.map(option => (
             <MenuItem key={option.value} value={option.value}>
               {option.label}
@@ -285,34 +294,26 @@ class ModelGrid extends React.Component {
           ))}
         </TextField>
         <TextField
-            id="selectLayer"
-            select
-            helperText = "Chose layer"
-            value={this.state.gridColorLayer}
-            className={classes.textField}
-            onChange={this.handleInput('gridColorLayer')}
-            SelectProps={{
-              MenuProps: {
-                className: classes.menu,
-              },
-            }}
-            margin="normal"
-          >
+          id="selectLayer"
+          select
+          helperText="Chose layer"
+          value={this.state.gridColorLayer}
+          className={classes.textField}
+          onChange={this.handleInput('gridColorLayer')}
+          SelectProps={{
+            MenuProps: {
+              className: classes.menu,
+            },
+          }}
+          margin="normal"
+        >
           {gridColorLayers.map(option => (
             <MenuItem key={option.value} value={option.value}>
               {option.label}
             </MenuItem>
           ))}
         </TextField>
-
-          {/* <Button onClick={this.setGridColorParameter.bind(this)}>
-            Color
-          </Button> */}
-          </Grid>
-        <Grid item xs={12}>
-          <canvas ref="canvas" className={classes.plot} width={width} height={height} />
-        </Grid>
-      </Grid>
+      </div>
     )
   }
 };

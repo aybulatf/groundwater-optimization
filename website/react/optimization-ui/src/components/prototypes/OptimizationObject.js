@@ -7,9 +7,8 @@ class OptimizationObject {
         this.fluxAdded = false;
         this.concentrationAdded = false;
         this.id = _id;
-        this.name = null
+
         this.position = {
-            
             lay: {
                 min: 0,
                 max: 0
@@ -22,7 +21,7 @@ class OptimizationObject {
                 min: 0,
                 max: 0
             }
-        },
+        };
         this.flux = {};
         this.concentration = {};
         for (let period of [...Array(nper).keys()]){
@@ -32,25 +31,26 @@ class OptimizationObject {
         }
     }
     setPosition(data){
+        
         for (let key in data) {
             switch(key){
-                case key === "layMin":
-                    this.lay.min = data[key];
+                case "layerMin":
+                    this.position.lay.min = data[key];
                     break;
-                case key === "layMax":
-                    this.lay.max = data[key];
+                case "layerMax":
+                    this.position.lay.max = data[key];
                     break;
-                case key === "rowMin":
-                    this.row.min = data[key];
+                case "rowMin":
+                    this.position.row.min = data[key];
                     break;
-                case key === "lrowMax":
-                    this.row.max = data[key];
+                case "rowMax":
+                    this.position.row.max = data[key];
                     break;
-                case key === "colMin":
-                    this.col.min = data[key];
+                case "colMin":
+                    this.position.col.min = data[key];
                     break;
-                case key === "colMax":
-                    this.col.max = data[key];
+                case "colMax":
+                    this.position.col.max = data[key];
                     break;
             }
         }

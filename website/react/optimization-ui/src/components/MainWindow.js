@@ -14,22 +14,19 @@ import CreateConstraints from './CreateConstraints';
 import RunOptimization from './RunOptimization';
 import ModelUpload from './ModelUpload';
 
-const styles = theme => ({
-  root: {
-    width: '90%',
-    minWidth: '800px',
+const styles = {
+  mainWindow: {
+    width: 1200,
+    // width: '90%',
+    // minWidth: '860px',
     marginLeft: "auto",
-    marginRight: "auto"
+    marginRight: "auto",
+    marginTop: 10
   },
-  
   button: {
-    marginRight: theme.spacing.unit,
+    margin: 10,
   },
-  instructions: {
-    marginTop: theme.spacing.unit,
-    marginBottom: theme.spacing.unit,
-  },
-});
+};
 
 function getSteps() {
   return [
@@ -97,8 +94,6 @@ class MainWindow extends React.Component {
   handleSkip = () => {
     const { activeStep } = this.state;
     if (!this.isStepOptional(activeStep)) {
-      // You probably want to guard against something like this,
-      // it should never occur unless someone's actively trying to break something.
       throw new Error("Can only skip the Define constraints step.");
     }
     this.setState(state => {
@@ -127,7 +122,7 @@ class MainWindow extends React.Component {
     const { activeStep } = this.state;
 
     return (
-      <div className={classes.root}>
+      <div className={classes.mainWindow}>
         <Stepper activeStep={activeStep}>
           {steps.map((label, index) => {
             const props = {};
@@ -154,7 +149,7 @@ class MainWindow extends React.Component {
           className={classes.button}
         >
           Back
-                  </Button>
+        </Button>
         {this.isStepOptional(activeStep) && (
           <Button
             variant="contained"
@@ -177,9 +172,5 @@ class MainWindow extends React.Component {
     );
   }
 }
-
-// MainWindow.propTypes = {
-//   classes: PropTypes.object,
-// };
 
 export default withStyles(styles)(MainWindow);

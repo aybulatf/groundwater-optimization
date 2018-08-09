@@ -8,103 +8,123 @@ import TableCell from '@material-ui/core/TableCell';
 import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
 import Button from '@material-ui/core/Button';
+import Paper from '@material-ui/core/Paper';
 
 
 const styles = {
-    table: {
-      width: 400
-    },
-    textField: {
-      marginLeft: 0,
-      marginRight: 0,
-      width: 50 ,
-    },
-    tableCell :{
-      margin: 0,
-      padding: 0
-    }
+  table: {
+  },
+  button: {
+    margin: 10
+  },
+  saveButton: {
+    marginTop: 10,
+  },
+  textField: {
+    padding: 5,
+    width: 70
+  },
+  inputText: {
+    fontSize: 12
+  },
+  formFlux: {
+    width: '100%',
+    marginTop: 20,
+    overflowX: 'auto',
+  }
 };
 
 class FormFlux extends React.Component {
-    constructor(props) {
-        super(props);
-        this.optimizationObject = props.optimizationObject;
-        
-        this.state = this.optimizationObject.flux;
-    }
-    handleSubmit(){
-        this.optimizationObject.setFlux(this.state);
-        this.optimizationObject.fluxAdded = true;
-        console.log(this.optimizationObject)
-        this.props.handleEditObject(null, null)
-    }
-    handleMinChange(event) {
-        const target = event.target;
-        const value = target.value;
-        const period = target.name;
+  constructor(props) {
+    super(props);
+    this.optimizationObject = props.optimizationObject;
 
-        this.setState((prevState) => {
-            return prevState[period].min = value
-        });
-    }
+    this.state = this.optimizationObject.flux;
+  }
+  handleSubmit() {
+    this.optimizationObject.flux = this.state;
+    this.optimizationObject.fluxAdded = true;
+    this.props.handleEditObject(null, null)
+  }
 
-    handleMaxChange(event) {
-            const target = event.target;
-            const value = target.value;
-            const period = target.name;
-    
-            this.setState((prevState) => {
-                return prevState[period].max = value
-            });
-      }
-    render() {
-        const { classes } = this.props;
-        const tableRows = this.state.map((period) =>
-            <TableRow>
-                <TableCell className={classes.tableCell}>
-                    {period}
-                </TableCell>
-                <TableCell className={classes.tableCell}>
-                    <TextField
-                        className={classes.textField}
-                        value={this.state[period].min}
-                        name={period}
-                        onChange={this.handleMinChange("name")}
-                    />
-                </TableCell>
-                <TableCell className={classes.tableCell}>
-                    <TextField
-                        className={classes.textField}
-                        value={this.state[period].max}
-                        name={period}
-                        onChange={this.handleMaxChange("name")}
-                    />
-                </TableCell>
-            </TableRow>
-        );
-        return (
-            <div>
-                <Typography variant="headline" gutterBottom>
-                    Define flux variables
-                </Typography>
-                <Table className={classes.table}>
-                <TableHead>
-                    <TableRow>
-                    <TableCell className={classes.tableCell}>Stress period</TableCell>
-                    <TableCell className={classes.tableCell}>Flux from </TableCell>
-                    <TableCell className={classes.tableCell}>Flux to</TableCell>
-                    </TableRow>
-                </TableHead>
-                <TableBody>
-                {tableRows}
-                </TableBody>
-                </Table>
-                <Button color="primary" className={classes.button} onClick = {this.handleSubmit.bind(this)}>
-                    Save
-                </Button>
-            </div>
-        )
-    }
+  handleInputChange = (period, minmax) => event => {
+    event.persist();
+    this.setState((prevState) => {
+      prevState[period][minmax] = event.target.value;
+      return prevState;
+    });
+  };
+  
+  render() {
+    const { classes } = this.props;
+    var tableRows = [];
+
+    for (let period in this.state) {
+      console.log("fluxMin" + period.toString())
+      tableRows.push(
+        <TableRow>
+          <TableCell className={classes.tableCell}>
+            {period}
+          </TableCell>
+          <TableCell className={classes.tableCell}>
+            <TextField
+              id={"fluxMin" + period.toString()}
+              className={classes.textField}
+              value={this.state[period].min}
+              type="number"
+              onChange={this.handleInputChange(period, "min")}
+              InputProps={{
+                classes: {
+                  input: classes.inputText,
+                },
+              }}
+            />
+          </TableCell>
+          <TableCell className={classes.tableCell}>
+            <TextField
+              id={"fluxMax" + period.toString()}
+              className={classes.textField}
+              value={this.state[period].max}
+              type="number"
+              onChange={this.handleInputChange(period, "max")}
+              InputProps={{
+                classes: {
+                  input: classes.inputText,
+                },
+              }}
+            />
+          </TableCell>
+          
+        </TableRow>
+      );
+    };
+    return (
+      <div>
+        <Typography variant="title" gutterBottom>
+          Define flux variables
+        </Typography>
+
+        <Paper className={classes.formFlux}>
+          <Table className={classes.table}>
+            <TableHead>
+              <TableRow>
+                <TableCell className={classes.tableCell}>Stress period</TableCell>
+                <TableCell className={classes.tableCell}>Flux from </TableCell>
+                <TableCell className={classes.tableCell}>Flux to</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {tableRows}
+            </TableBody>
+          </Table>
+        </Paper>
+        <Button color="primary" variant="contained" className={classes.saveButton}
+          onClick={this.handleSubmit.bind(this)}>
+          Save
+        </Button>
+      </div>
+    )
+  }
 }
 
 export default withStyles(styles)(FormFlux);

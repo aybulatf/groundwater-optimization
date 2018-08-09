@@ -2,7 +2,7 @@ import React from 'react'
 import { withStyles } from '@material-ui/core/styles';
 import Paper from '@material-ui/core/Paper';
 import Button from '@material-ui/core/Button';
-
+import Typography from '@material-ui/core/Typography';
 import Grid from '@material-ui/core/Grid';
 
 
@@ -14,18 +14,13 @@ import FormFlux from './forms/FormFlux'
 import FormConcentration from './forms/FormConcentration'
 
 const styles = {
-  root: {
-    margin: 20,
+  addModelObjects: {
+    // margin: 20,
     padding: 20,
-    minWidth: 800,
+    width: "100%",
     justifyContent: 'center',
     alignItems: 'center',
-  },
-  button: {
-    margin: 20,
-  },
-  rightIcon: {
-    marginLeft: 10,
+    backgroundColor: '#EFF3F6'
   },
 }
 
@@ -50,14 +45,11 @@ class AddOptimizationObjects extends React.Component {
         this.modelData.data.mf.DIS.ncol,
         this.modelData.data.mf.DIS.nper
       );
-      console.log(newObject)
       return {optimizationObjects: prevState.optimizationObjects.concat([newObject])};
     });
   };
 
   handleEditObject(index, parameter) {
-    console.log(index)
-    console.log(parameter)
     this.setState({
       editedObjectIndex: index,
       editedParameter: parameter
@@ -68,19 +60,21 @@ class AddOptimizationObjects extends React.Component {
 
     const { classes } = this.props;
     const { optimizationObjects, editedObjectIndex, editedParameter } = this.state;
-    console.log(editedParameter)
-    console.log(editedObjectIndex)
+    console.log(optimizationObjects)
     return (
-      <Paper className={classes.root}>
-        <Grid>
+      <Paper className={classes.addModelObjects}>
+        <Grid container spacing={24}>
           <Grid item xs={6}>
+            <Typography variant="title" gutterBottom>
+              Optimization objects:
+            </Typography>
             <OptimizationObjectsTable
               optimizationObjects={optimizationObjects}
               handleEditObject={this.handleEditObject.bind(this)}
             />
-            <Button color="primary" className={classes.button} onClick={this.handleAddObject.bind(this)}>
+            <Button color="primary" variant="outlined" className={classes.button} onClick={this.handleAddObject.bind(this)}>
               Add wel
-              </Button>
+            </Button>
           </Grid>
 
           <Grid item xs={6}>
@@ -90,35 +84,18 @@ class AddOptimizationObjects extends React.Component {
                handleEditObject={this.handleEditObject.bind(this)}
              />
             )}
-            {/* {function () {
-              
-              switch (editedParameter) {
-                
-                case "position":
-                return(
-                  <FormPosition
-                    optimizationObject={optimizationObjects[editedObjectIndex]}
-                    handleEditObject={this.handleEditObject.bind(this)}
-                  />)
-                  break;
-                case "flux":
-                  <FormFlux
-                    optimizationObject={optimizationObjects[editedObjectIndex]}
-                    handleEditObject={this.handleEditObject.bind(this)}
-                  />
-                  break;
-                case "concentration":
-                  <FormConcentration
-                    optimizationObject={optimizationObjects[editedObjectIndex]}
-                    handleEditObject={this.handleEditObject.bind(this)}
-                  />
-                  break;
-
-                default:
-                  break;
-              }
-            }
-            } */}
+            {editedParameter === "flux" && (
+               <FormFlux
+               optimizationObject={optimizationObjects[editedObjectIndex]}
+               handleEditObject={this.handleEditObject.bind(this)}
+             />
+            )}
+            {editedParameter === "concentration" && (
+               <FormConcentration
+               optimizationObject={optimizationObjects[editedObjectIndex]}
+               handleEditObject={this.handleEditObject.bind(this)}
+             />
+            )}
           </Grid>
         </Grid>
 

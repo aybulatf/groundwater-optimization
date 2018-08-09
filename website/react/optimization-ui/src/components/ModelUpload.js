@@ -11,22 +11,20 @@ import ModelGrid from './ModelGrid';
 import ModelOverviewTable from './ModelOverviewTable';
 
 const styles = {
-  root: {
-    margin: 20,
+  modelUpload: {
     padding: 20,
-    minWidth: 800,
+    width: "100%",
     justifyContent: 'center',
     alignItems: 'center',
+    backgroundColor: '#EFF3F6'
   },
   input: {
     display: 'none',
   },
   progress: {},
-  table: {
-    width: 400
-  },
+
   button: {
-    margin: 20,
+    margin: 10,
   },
   rightIcon: {
     marginLeft: 10,
@@ -106,8 +104,7 @@ class ModelUpload extends React.Component {
     const { classes } = this.props;
     const { modelData } = this.state;
     return (
-      <Paper className={classes.root}>
-
+      <Paper className={classes.modelUpload}>
         {this.state.waitingForResponse ? (
           <div className={classes.progress} >
             <CircularProgress />
@@ -117,7 +114,7 @@ class ModelUpload extends React.Component {
             {this.state.modelUploaded ? (
               <div>
                 <Grid container spacing={24}>
-                  <Grid item xs>
+                  <Grid item xs={6}>
                     <ModelOverviewTable 
                       mfPackages = {this.modelData.data.mf.packages}
                       mtPackages = {this.modelData.data.mt.packages}
@@ -127,10 +124,10 @@ class ModelUpload extends React.Component {
                       nper = {this.modelData.data.mf.DIS.nper}
                     />
                   </Grid>
-                  <Grid item xs>
+                  <Grid item xs={6}>
                     <ModelGrid
                       modelData = {this.modelData}
-                      width = {500}
+                      width = {580}
                       height = {500}
                     />
                   </Grid>

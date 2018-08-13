@@ -1,7 +1,6 @@
 import React from 'react'
 import { withStyles } from '@material-ui/core/styles';
 import Typography from '@material-ui/core/Typography';
-import TextField from '@material-ui/core/TextField';
 import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
 import TableCell from '@material-ui/core/TableCell';
@@ -9,6 +8,9 @@ import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
 import Button from '@material-ui/core/Button';
 import Paper from '@material-ui/core/Paper';
+import { ValidatorForm, TextValidator} from 'react-material-ui-form-validator';
+
+import ObjectConcentration from '../prototypes/ObjectConcentration';
 
 
 const styles = {
@@ -37,20 +39,36 @@ const styles = {
 class FormConcentration extends React.Component {
   constructor(props) {
     super(props);
-    this.optimizationObject = props.optimizationObject;
+    this.editedObject = props.editedObject;
+    this.objectConcentration = new ObjectConcentration(props.nper)
+    if (this.editedObject.concentration != null) {
+      this.objectConcentration.concentration = this.editedObject.concentration;
+    }
+    this.state = this.objectConcentration.concentration;
 
-    this.state = this.optimizationObject.concentration;
   }
   handleSubmit() {
-    this.optimizationObject.flux = this.state;
-    this.optimizationObject.concentrationAdded = true;
+    this.editedObject.concentration = this.state;
     this.props.handleEditObject(null, null)
   }
 
   handleInputChange = (period, component, minmax) => event => {
-    event.persist();
+    const value = parseFloat(event.target.value);
     this.setState((prevState) => {
-      prevState[period][component][minmax] = event.target.value;
+      switch(minmax) {
+        case "min":
+          prevState[period][component]["min"] = value;
+          if (value > prevState[period][component]["max"]){
+            prevState[period][component]["max"] = value;
+          }
+          break;
+        case "max":
+          prevState[period][component]["max"] = value;
+          if (value < prevState[period][component]["min"]){
+            prevState[period][component]["min"] = value;
+          }
+          break;
+      };
       return prevState;
     });
   };
@@ -58,7 +76,7 @@ class FormConcentration extends React.Component {
   handleAddComponent() {
     this.setState((prevState) => {
       const newComponentName = "component"+(Object.keys(prevState[0]).length+1).toString();
- 
+      
       for (let period in prevState) {
         prevState[period][newComponentName] = {min: 0, max: 0}
       }
@@ -95,8 +113,9 @@ class FormConcentration extends React.Component {
           );
           bodyRowCells.push(
             <TableCell className={classes.tableCell}>
-              <TextField
+              <TextValidator
                 id={"concMin" + component + period.toString()}
+                name={"concMin" + component + period.toString()}
                 className={classes.textField}
                 value={this.state[period][component].min}
                 type="number"
@@ -106,13 +125,20 @@ class FormConcentration extends React.Component {
                     input: classes.inputText,
                   },
                 }}
+                validators={[
+                  'required'
+                ]}
+                errorMessages={[
+                  'number is required'
+                ]}
               />
             </TableCell>
           );
           bodyRowCells.push(
             <TableCell className={classes.tableCell}>
-              <TextField
+              <TextValidator
                 id={"concMax" + component + period.toString()}
+                name={"concMin" + component + period.toString()}
                 className={classes.textField}
                 value={this.state[period][component].max}
                 type="number"
@@ -122,6 +148,12 @@ class FormConcentration extends React.Component {
                     input: classes.inputText,
                   },
                 }}
+                validators={[
+                  'required'
+                ]}
+                errorMessages={[
+                  'number is required'
+                ]}
               />
             </TableCell>
           );
@@ -133,27 +165,32 @@ class FormConcentration extends React.Component {
         <Typography variant="title" gutterBottom>
           Define flux variables
         </Typography>
-
-        <Paper className={classes.formConcentration}>
-          <Table className={classes.table}>
-            <TableHead>
-              <TableRow>
-                {headerRowCells}
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {tableRows}
-            </TableBody>
-          </Table>
-          <Button color="primary" variant="outlined" className={classes.button}
-            onClick={this.handleAddComponent.bind(this)}>
-            Add component
+        <ValidatorForm
+          ref="concentrationForm"
+          onSubmit={this.handleSubmit.bind(this)}
+          onError={errors => console.log(errors)}
+        >
+          <Paper className={classes.formConcentration}>
+            <Table className={classes.table}>
+              <TableHead>
+                <TableRow>
+                  {headerRowCells}
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {tableRows}
+              </TableBody>
+            </Table>
+            <Button color="primary" variant="outlined" className={classes.button}
+              onClick={this.handleAddComponent.bind(this)}>
+              Add component
+            </Button>
+          </Paper>
+          <Button color="primary" variant="contained" className={classes.saveButton} type="submit">
+            Save
           </Button>
-        </Paper>
-        <Button color="primary"  variant="contained" className={classes.saveButton}
-          onClick={this.handleSubmit.bind(this)}>
-          Save
-        </Button>
+        </ValidatorForm>
+
         
       </div>
     )

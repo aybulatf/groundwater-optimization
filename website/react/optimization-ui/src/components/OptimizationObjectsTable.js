@@ -40,7 +40,7 @@ const OptimizationObjectsTable = (props) => {
           {_object.id}
         </TableCell>
         <TableCell className={classes.tableCell}>
-          {_object.positionAdded ? (
+          {_object.position != null ? (
             <Button color="primary" size="small" variant="text" className={classes.button} 
               onClick = {props.handleEditObject.bind(this, _object.id, "position")}>
               Edit position variables
@@ -53,7 +53,7 @@ const OptimizationObjectsTable = (props) => {
           )}
         </TableCell>
         <TableCell className={classes.tableCell}>
-          {_object.fluxAdded ? (
+          {_object.flux != null ? (
             <Button color="primary" size="small" variant="text" className={classes.button} 
             onClick = {props.handleEditObject.bind(this, _object.id, "flux")}>
             Edit flux variables
@@ -66,7 +66,7 @@ const OptimizationObjectsTable = (props) => {
           )}
         </TableCell>
         <TableCell className={classes.tableCell}>
-          {_object.concentrationAdded ? (
+          {_object.concentration != null ? (
             <Button color="primary" size="small" variant="text" className={classes.button} 
               onClick = {props.handleEditObject.bind(this, _object.id, "concentration")}>
               Edit concentration variables

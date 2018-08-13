@@ -125,10 +125,15 @@ class ModelUpload extends React.Component {
                     />
                   </Grid>
                   <Grid item xs={6}>
+                    <Typography variant="headline" gutterBottom>
+                      Model grid
+                    </Typography>
                     <ModelGrid
                       modelData = {this.modelData}
                       width = {580}
                       height = {500}
+                      selectedRows = {null}
+                      selectedCols = {null}
                     />
                   </Grid>
                 </Grid>

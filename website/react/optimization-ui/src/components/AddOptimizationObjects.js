@@ -28,24 +28,21 @@ class AddOptimizationObjects extends React.Component {
   constructor(props) {
     super(props);
     this.modelData = props.modelData,
-
       this.state = {
         optimizationObjects: []
       };
     this.editedObject = null;
     this.editedParameter = null;
+    this.objectID = 0;
   }
 
   handleAddObject() {
     this.setState((prevState, props) => {
       let newObject = new OptimizationObject(
-        prevState.optimizationObjects.length,
-        this.modelData.data.mf.DIS.nlay,
-        this.modelData.data.mf.DIS.nrow,
-        this.modelData.data.mf.DIS.ncol,
-        this.modelData.data.mf.DIS.nper
+        this.objectID,
       );
-      return {optimizationObjects: prevState.optimizationObjects.concat([newObject])};
+      this.objectID += 1;
+      return { optimizationObjects: prevState.optimizationObjects.concat([newObject]) };
     });
   };
 
@@ -60,7 +57,7 @@ class AddOptimizationObjects extends React.Component {
 
     const { classes } = this.props;
     const { optimizationObjects, editedObjectIndex, editedParameter } = this.state;
-    console.log(optimizationObjects)
+
     return (
       <Paper className={classes.addModelObjects}>
         <Grid container spacing={24}>
@@ -79,22 +76,43 @@ class AddOptimizationObjects extends React.Component {
 
           <Grid item xs={6}>
             {editedParameter === "position" && (
-               <FormPosition
-               optimizationObject={optimizationObjects[editedObjectIndex]}
-               handleEditObject={this.handleEditObject.bind(this)}
-             />
+              <FormPosition
+                editedObject={
+                  optimizationObjects.find(
+                    function (_object) {
+                      return _object.id == editedObjectIndex
+                    }
+                  )
+                }
+                handleEditObject={this.handleEditObject.bind(this)}
+                modelData={this.modelData}
+              />
             )}
             {editedParameter === "flux" && (
-               <FormFlux
-               optimizationObject={optimizationObjects[editedObjectIndex]}
-               handleEditObject={this.handleEditObject.bind(this)}
-             />
+              <FormFlux
+                editedObject={
+                  optimizationObjects.find(
+                    function (_object) {
+                      return _object.id == editedObjectIndex
+                    }
+                  )
+                }
+                handleEditObject={this.handleEditObject.bind(this)}
+                nper={this.modelData.data.mf.DIS.nper}
+              />
             )}
             {editedParameter === "concentration" && (
-               <FormConcentration
-               optimizationObject={optimizationObjects[editedObjectIndex]}
-               handleEditObject={this.handleEditObject.bind(this)}
-             />
+              <FormConcentration
+                editedObject={
+                  optimizationObjects.find(
+                    function (_object) {
+                      return _object.id == editedObjectIndex
+                    }
+                  )
+                }
+                handleEditObject={this.handleEditObject.bind(this)}
+                nper={this.modelData.data.mf.DIS.nper}
+              />
             )}
           </Grid>
         </Grid>

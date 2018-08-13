@@ -9,6 +9,9 @@ import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
 import Button from '@material-ui/core/Button';
 import Paper from '@material-ui/core/Paper';
+import { ValidatorForm, TextValidator} from 'react-material-ui-form-validator';
+
+import ObjectFlux from '../prototypes/ObjectFlux';
 
 
 const styles = {
@@ -37,20 +40,35 @@ const styles = {
 class FormFlux extends React.Component {
   constructor(props) {
     super(props);
-    this.optimizationObject = props.optimizationObject;
-
-    this.state = this.optimizationObject.flux;
+    this.editedObject = props.editedObject;
+    this.objectFlux = new ObjectFlux(props.nper)
+    if (this.editedObject.flux != null) {
+      this.objectFlux.flux = this.editedObject.flux;
+    }
+    this.state = this.objectFlux.flux;
   }
   handleSubmit() {
-    this.optimizationObject.flux = this.state;
-    this.optimizationObject.fluxAdded = true;
+    this.editedObject.flux = this.state;
     this.props.handleEditObject(null, null)
   }
 
   handleInputChange = (period, minmax) => event => {
-    event.persist();
+    const value = parseFloat(event.target.value);
     this.setState((prevState) => {
-      prevState[period][minmax] = event.target.value;
+      switch(minmax) {
+        case "min":
+          prevState[period]["min"] = value;
+          if (value > prevState[period]["max"]){
+            prevState[period]["max"] = value;
+          }
+          break;
+        case "max":
+          prevState[period]["max"] = value;
+          if (value < prevState[period]["min"]){
+            prevState[period]["min"] = value;
+          }
+          break;
+      };
       return prevState;
     });
   };
@@ -60,15 +78,15 @@ class FormFlux extends React.Component {
     var tableRows = [];
 
     for (let period in this.state) {
-      console.log("fluxMin" + period.toString())
       tableRows.push(
         <TableRow>
           <TableCell className={classes.tableCell}>
             {period}
           </TableCell>
           <TableCell className={classes.tableCell}>
-            <TextField
+            <TextValidator
               id={"fluxMin" + period.toString()}
+              name={"fluxMin" + period.toString()}
               className={classes.textField}
               value={this.state[period].min}
               type="number"
@@ -78,11 +96,18 @@ class FormFlux extends React.Component {
                   input: classes.inputText,
                 },
               }}
+              validators={[
+                'required'
+              ]}
+              errorMessages={[
+                'number is required'
+              ]}
             />
           </TableCell>
           <TableCell className={classes.tableCell}>
-            <TextField
+            <TextValidator
               id={"fluxMax" + period.toString()}
+              name={"fluxMax" + period.toString()}
               className={classes.textField}
               value={this.state[period].max}
               type="number"
@@ -92,6 +117,12 @@ class FormFlux extends React.Component {
                   input: classes.inputText,
                 },
               }}
+              validators={[
+                'required'
+              ]}
+              errorMessages={[
+                'number is required'
+              ]}
             />
           </TableCell>
           
@@ -103,25 +134,29 @@ class FormFlux extends React.Component {
         <Typography variant="title" gutterBottom>
           Define flux variables
         </Typography>
-
-        <Paper className={classes.formFlux}>
-          <Table className={classes.table}>
-            <TableHead>
-              <TableRow>
-                <TableCell className={classes.tableCell}>Stress period</TableCell>
-                <TableCell className={classes.tableCell}>Flux from </TableCell>
-                <TableCell className={classes.tableCell}>Flux to</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {tableRows}
-            </TableBody>
-          </Table>
-        </Paper>
-        <Button color="primary" variant="contained" className={classes.saveButton}
-          onClick={this.handleSubmit.bind(this)}>
-          Save
-        </Button>
+        <ValidatorForm
+          ref="fluxForm"
+          onSubmit={this.handleSubmit.bind(this)}
+          onError={errors => console.log(errors)}
+        >
+          <Paper className={classes.formFlux}>
+            <Table className={classes.table}>
+              <TableHead>
+                <TableRow>
+                  <TableCell className={classes.tableCell}>Stress period</TableCell>
+                  <TableCell className={classes.tableCell}>Flux from </TableCell>
+                  <TableCell className={classes.tableCell}>Flux to</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {tableRows}
+              </TableBody>
+            </Table>
+          </Paper>
+          <Button color="primary" variant="contained" className={classes.saveButton} type="submit">
+              Save
+            </Button>
+        </ValidatorForm>
       </div>
     )
   }

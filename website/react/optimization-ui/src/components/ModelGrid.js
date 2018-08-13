@@ -9,8 +9,8 @@ import MenuItem from '@material-ui/core/MenuItem';
 
 const styles = {
   modelGrid: {
-    // width: '100%',
-    width: 580,
+    width: '100%',
+    // width: 580,
     marginTop: 10,
     marginBottom: 10,
     overflowX: 'auto',
@@ -32,6 +32,11 @@ const getGridColor = (parameter, value) => {
       switch (value) {
         case 0: return "white";
         case 1: return "blue";
+      };
+    case "selection":
+      switch (value) {
+        case 0: return "white";
+        case 1: return "red";
       };
     default:
       switch (value) {
@@ -81,8 +86,12 @@ class ModelGrid extends React.Component {
 
   constructor(props) {
     super(props);
-    this.gridData = getGrid(props.modelData.data.mf.DIS.delr, props.modelData.data.mf.DIS.delc);
+    this.delr = props.modelData.data.mf.DIS.delr;
+    this.delc = props.modelData.data.mf.DIS.delc;
+    this.gridData = getGrid(this.delr, this.delc);
     this.scaleFactor = Math.min(props.width / this.gridData.modelWidth, props.height / this.gridData.modelHeight);
+    this.maxZoom = 15;
+    this.minZoom = -3;
     this.spdPackages = [];
     this.nrow = props.modelData.data.mf.DIS.nrow;
     this.ncol = props.modelData.data.mf.DIS.ncol;
@@ -102,8 +111,17 @@ class ModelGrid extends React.Component {
     this.state = {
       gridColorParameter: null,
       gridColorLayer: null,
-      zoomTransform: null
+      zoomTransform: null,
+      selectedRows: props.selectedRows,
+      selectedCols: props.selectedCols,
     }
+  }
+
+  setSelectedCells(selectedRows, selectedCols) {
+    this.setState({
+      selectedRows: selectedRows,
+      selectedCols: selectedCols
+    })
   }
 
   scaleGridData(value) {
@@ -185,13 +203,100 @@ class ModelGrid extends React.Component {
         console.log('Unknown package ' + parameter.toString())
     }
   }
-  componentDidMount() {
+  getInitialZoomTransform(selectedRows, selectedCols) {
+    var selectedRowsLength = 0;
+    var selectedColsLength = 0;
 
-    this.canvas = d3.select(this.refs.canvas).call(d3.zoom().scaleExtent([-3, 15]).on("zoom", this.zoomed.bind(this)));
+    for(let i of selectedRows ){
+      selectedRowsLength += this.delr[i];
+    };
+    for(let i of selectedCols){
+      selectedColsLength += this.delc[i];
+    };
+    const xZoom = (this.gridData.modelWidth/selectedColsLength)/2;
+    const yZoom = (this.gridData.modelHeight/selectedRowsLength)/2
+
+    var initZoom = Math.min(xZoom, yZoom);
+    if (initZoom > this.maxZoom) {
+      initZoom = this.maxZoom;
+    };
+
+    var initX = 0;
+    var initY = 0;
+    for(let i = 0; i<selectedRows[0]; i++ ){
+      initY -= this.delr[i];
+    };
+    for(let i =0; i<selectedCols[0]; i++ ){
+      initX -= this.delc[i];
+    };
+
+    initX = this.scaleGridData(initX+selectedColsLength/2)*initZoom;
+    initY = this.scaleGridData(initY+selectedRowsLength/2)*initZoom;
+
+    return {initZoom, initX, initY};
+  }
+
+  makeGridArray(nrow, ncol) {
+    var gridArray = [];
+    for (let i=0; i<nrow; i++) {
+      var row = [];
+      for (let j=0; j<ncol; j++) {
+        row.push(0);
+      }
+      gridArray.push(row);
+    }
+    return gridArray;
+  }
+  
+
+  getSelectionGrid (gridArray, selectedRows, selectedCols){
+
+    for (let r in selectedRows) {
+      if (r<0) {r=0}
+      for (let c in selectedCols) {
+        if (c<0) {c=0}
+        gridArray[selectedRows[r]][selectedCols[c]] = 1;
+      }
+    }
+
+    return gridArray;
+  }
+
+  componentDidMount() {
+    var selectionGrid = null;
+    var initialZoomTransform = null;
+    if (this.state.selectedRows !== null && this.state.selectedCols !== null) {
+      initialZoomTransform = this.getInitialZoomTransform(this.state.selectedRows, this.state.selectedCols);
+      selectionGrid = this.getSelectionGrid(
+        this.makeGridArray(this.nrow, this.ncol),
+        this.state.selectedRows, this.state.selectedCols
+      );
+    }
+
+    var d3zoom = d3.zoom().scaleExtent([this.minZoom, this.maxZoom]).on("zoom", this.zoomed.bind(this));
+    if (initialZoomTransform !== null) {
+      this.canvas = d3.select(this.refs.canvas)
+                      .call(d3zoom)
+                      .call(d3zoom.transform, d3.zoomIdentity
+                        .translate(initialZoomTransform.initX, initialZoomTransform.initY)
+                        .scale(initialZoomTransform.initZoom));
+    } else {
+      this.canvas = d3.select(this.refs.canvas)
+                      .call(d3zoom);
+    }
     this.ctx = this.canvas.node().getContext("2d");
 
+    if (selectionGrid) {
+      for (let d of this.gridData.data) {
+        this.ctx.fillStyle = getGridColor("selection", selectionGrid[d[4]][d[5]]);
+        this.ctx.fillRect(
+          this.scaleGridData(d[0]), this.scaleGridData(d[1]), this.scaleGridData(d[2]), this.scaleGridData(d[3])
+        );
+      }
+    }
+
     this.ctx.beginPath();
-    for (const d of this.gridData.data) {
+    for (let d of this.gridData.data) {
       this.ctx.rect(
         this.scaleGridData(d[0]), this.scaleGridData(d[1]), this.scaleGridData(d[2]), this.scaleGridData(d[3]))
     }
@@ -202,6 +307,7 @@ class ModelGrid extends React.Component {
 
   componentDidUpdate() {
     var gridValues = null;
+    var selectionGrid = null;
     this.ctx.save();
     this.ctx.clearRect(0, 0, this.props.width, this.props.height);
 
@@ -209,10 +315,17 @@ class ModelGrid extends React.Component {
       this.ctx.translate(this.state.zoomTransform.x, this.state.zoomTransform.y);
       this.ctx.scale(this.state.zoomTransform.k, this.state.zoomTransform.k);
     }
+
     if (this.state.gridColorParameter !== null && this.state.gridColorLayer !== null) {
       gridValues = this.getGridValues(this.state.gridColorParameter, this.state.gridColorLayer)
     }
-    console.log(gridValues)
+
+    if (this.state.selectedRows !== null && this.state.selectedCols !== null) {
+      selectionGrid = this.getSelectionGrid(
+        this.makeGridArray(this.nrow, this.ncol),
+        this.props.selectedRows, this.props.selectedCols
+      );
+    }
 
     if (gridValues) {
       for (let d of this.gridData.data) {
@@ -221,8 +334,21 @@ class ModelGrid extends React.Component {
           this.scaleGridData(d[0]), this.scaleGridData(d[1]), this.scaleGridData(d[2]), this.scaleGridData(d[3])
         );
       }
-
     }
+
+    if (selectionGrid) {
+      for (let d of this.gridData.data) {
+        this.ctx.fillStyle = getGridColor("selection", selectionGrid[d[4]][d[5]]);
+        this.ctx.fillRect(
+          this.scaleGridData(d[0]), this.scaleGridData(d[1]), this.scaleGridData(d[2]), this.scaleGridData(d[3])
+        );
+      }
+    }
+
+    
+
+    
+
     this.ctx.beginPath();
     for (let d of this.gridData.data) {
       this.ctx.rect(
@@ -265,10 +391,6 @@ class ModelGrid extends React.Component {
 
     return (
       <div>
-        <Typography variant="headline" gutterBottom>
-          Model grid
-        </Typography>
-
         <Paper className={classes.modelGrid}>
             <canvas ref="canvas" className={classes.plot} width={width} height={height} />
         </Paper>
